@@ -1,0 +1,1 @@
+pyspark --conf "spark.driver.bindAddress=127.0.0.1"
