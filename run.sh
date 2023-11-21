@@ -1,10 +1,23 @@
-## pyspark 로컬 환경에서 실행
-pyspark \
-    --conf "spark.driver.bindAddress=127.0.0.1" \
-    --master local[*] \
-    --num-executors 17 \
-    --executor-cores 5 \
-    --executor-memory 19G \
+#!/bin/bash
+FILE_PATH="test.txt"
+SCRIPT_PATH="json-preprocessor.py"
 
 
-# https://blog.cloudera.com/how-to-tune-your-apache-spark-jobs-part-2/
+unset PYSPARK_DRIVER_PYTHON
+unset PYSPARK_DRIVER_PYTHON_OPTS
+
+
+count=0
+while [ -f $FILE_PATH ]
+do
+    if ! cat $FILE_PATH | grep -q '[^[:space:]]'; then
+        echo "test.txt is empty."
+        break
+    fi
+    count=$((count+1))
+    echo "Job: $count"
+    spark-submit \
+        --conf "spark.driver.bindAddress=127.0.0.1" \
+        --master local[*] \
+        $SCRIPT_PATH
+done
