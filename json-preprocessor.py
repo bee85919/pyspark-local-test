@@ -16,7 +16,7 @@ spark = SparkSession \
 def nth_json_path(n):
     return f'/Users/b06/Desktop/yeardream/medi-05/data/naverplace_meta/naverplace_meta_{n}.json'
 def read_write_txt():
-    file_path = '/Users/b06/Desktop/yeardream/medi-05/test.txt'
+    file_path = '/Users/b06/Desktop/yeardream/medi-05/pyspark-local-test/test.txt'
     with open(file_path, 'r') as file:
         lines = file.readlines()
     n = lines.pop(0).strip()
@@ -25,7 +25,7 @@ def read_write_txt():
     return n
 
 
-file_path = '/Users/b06/Desktop/yeardream/medi-05/test.txt'
+file_path = '/Users/b06/Desktop/yeardream/medi-05/pyspark-local-test/test.txt'
 n = read_write_txt()
 data = spark.read.json(nth_json_path(n))
 
@@ -168,7 +168,7 @@ def get_review_keyword_table(struct_df, review_keyword_columns, review_keyword_d
     return review_keyword_df.union(review_keyword_row)
 def check_null(df, column):
     cnt = df.filter(col(column).isNull()).count()
-    return True if cnt == 10 else False
+    return True if cnt == 25 else False
 def get_homepages_table(struct_df, homepages_columns, homepages_table):
     if check_null(struct_df, 'homepages.repr'):
         return homepages_table
@@ -198,10 +198,18 @@ for hospital_base in hospital_bases:
     payments_table = get_table_and_explode(df, payments_columns, payments_table, 'paymentInfo')
     
     
-string_table.show(50)
-review_keyword_table.show(50)
-homepages_table.show(50)
-conveniences_table.show(50)
-keywords_table.show(50)
-payments_table.show(50)
-description_table.show(50)
+base_path = '/Users/b06/Desktop/yeardream/medi-05/data/output/'
+def save_to_csv(df, name):
+    path = os.path.join(base_path, name)
+    # DataFrame을 하나의 파일로 저장
+    # coalesce(1)을 사용하여 모든 데이터를 단일 파티션으로 합침
+    df.coalesce(1).write.mode('append').option("encoding", "cp949").csv(path, header=True)
+
+
+save_to_csv(string_table, 'string_table')
+save_to_csv(description_table, 'description_table')
+save_to_csv(review_keyword_table, 'review_keyword_table')
+save_to_csv(homepages_table, 'homepages_table')
+save_to_csv(conveniences_table, 'conveniences_table')
+save_to_csv(keywords_table, 'keywords_table')
+save_to_csv(payments_table, 'payments_table')
